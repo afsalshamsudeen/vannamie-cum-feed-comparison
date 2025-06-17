@@ -87,3 +87,30 @@ ggplot(sim_results, aes(x = Adjusted_Cum_Feed)) +
   theme_minimal(base_size = 14)
 
 ggsave("cum_feed_simulation_plot.pdf", width = 8, height = 5)
+
+# ------------------- Compute Evaluation Metrics -------------------
+
+# Define metric functions
+calc_metrics <- function(actual, predicted) {
+  rmse <- sqrt(mean((actual - predicted)^2))
+  mae <- mean(abs(actual - predicted))
+  mape <- mean(abs((actual - predicted) / actual)) * 100
+  r2 <- cor(actual, predicted)^2
+  return(c(RMSE = rmse, MAE = mae, MAPE = mape, R2 = r2))
+}
+
+# Calculate metrics for both models
+xgb_metrics <- calc_metrics(sim_results$XGBoost_Pred, sim_results$BPNN_Pred)  # simulate BPNN as actual (or vice versa)
+bpnn_metrics <- calc_metrics(sim_results$BPNN_Pred, sim_results$XGBoost_Pred)
+
+# Combine into a dataframe
+metrics_df <- rbind(
+  data.frame(Model = "XGBoost", t(xgb_metrics)),
+  data.frame(Model = "BPNN", t(bpnn_metrics))
+)
+
+# Print metrics
+print(metrics_df)
+
+# Save to CSV
+write.csv(metrics_df, "cum_feed_simulation_metrics.csv", row.names = FALSE)
