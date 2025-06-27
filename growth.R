@@ -28,7 +28,7 @@ baseline <- apply(encoded_df, 2, median)
 baseline_input <- as.data.frame(t(baseline))
 
 # ------------------- Setup for Simulation -------------------
-pct_changes <- seq(-0.5, 0.5, by = 0.1)
+pct_changes <- c(-0.15, -0.10, -0.05, 0, 0.05, 0.10, 0.15)
 sim_results <- data.frame(
   Change = paste0(pct_changes * 100, "%"),
   Adjusted_Cum_Feed = round(baseline_input$Cum_Feed * (1 + pct_changes), 2),
@@ -68,7 +68,12 @@ ggplot(sim_results, aes(x = Adjusted_Cum_Feed, y = XGBoost_Pred)) +
 ggsave("cum_feed_simulation_plot.pdf", width = 8, height = 5)
 
 # Save simulation predictions
-write.csv(sim_results, "cum_feed_simulation_predictions.csv", row.names = FALSE)
+if (!dir.exists("results")) {
+  dir.create("results")
+}
+
+write.csv(real_metrics, "results/performance_metrics.csv", row.names = FALSE)
+
 
 #___________________________________________________________________________________
 
